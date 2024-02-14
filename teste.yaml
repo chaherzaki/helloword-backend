@@ -1,0 +1,38 @@
+
+trigger:
+- master  # ou a branch que você deseja monitorar
+
+pool:
+  vmImage: 'ubuntu-latest'  # Escolha a imagem de máquina virtual desejada
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '14.x'  # Versão do Node.js a ser usada
+  displayName: 'Instalar o Node.js'
+
+- task: Npm@1
+  inputs:
+    command: 'install'
+    workingDir: '$(Build.SourcesDirectory)/front-end/customer-app'
+    verbose:  true
+  displayName: 'npm install'
+  
+- task: Npm@1
+  inputs:
+    command: custom
+    workingDir: '$(Build.SourcesDirectory)/front-end/customer-app'
+    customCommand: 'run-script build --prod'
+  displayName: 'npm build'
+
+- task: Bash@3
+  displayName: Install azcopy
+  inputs:
+    targetType: 'inline'
+    script: |
+      curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+      mkdir $(Agent.ToolsDirectory)/azcopy
+      wget -O $(Agent.ToolsDirectory)/azcopy/azcopy_v10.tar.gz https://aka.ms/downloadazcopy-v10-linux
+
+- script: 
+    azcopy cp "/front-end/customer-app/build" "https://sto23f49v.blob.core.windows.net/teste?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2023-12-26T20:33:09Z&st=2023-12-26T12:33:09Z&spr=https&sig=C2zeQEMU1sKrnPkG65M1arLsow%2B9Avg94i0sDS2I4Ow%3D" --recursive=true
