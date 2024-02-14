@@ -1,0 +1,9 @@
+{
+    "routes": [
+      {
+        "route": "/teste",
+        "rewrite": "www.uol.com.br",
+        "statusCode": 200
+      }
+    ]
+  }
